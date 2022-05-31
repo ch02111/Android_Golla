@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:title="음식 정하기"
+        android:id="@+id/games"
+        android:icon="@drawable/ic_random"/>
+
+    <item
+        android:title="음식 지도"
+        android:id="@+id/map"
+        android:icon="@drawable/ic_map"/>
+
+    <item
+        android:title="과거 기록"
+        android:id="@+id/record"
+        android:icon="@drawable/ic_history"/>
+
+</menu>
