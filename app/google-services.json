@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "262594559907",
+    "project_id": "golla-d8534",
+    "storage_bucket": "golla-d8534.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262594559907:android:584f7e745290ebfa93a416",
+        "android_client_info": {
+          "package_name": "com.example.golla"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "262594559907-il9op8nba465stbk23pa44mntghknm5i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB85GFPfYgCbqCvwcOV6i7CUxrXYu4YEhA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "262594559907-il9op8nba465stbk23pa44mntghknm5i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
