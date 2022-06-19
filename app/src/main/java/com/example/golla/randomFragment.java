@@ -10,6 +10,7 @@ import android.nfc.Tag;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
 
@@ -35,17 +36,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.model.Document;
 import com.jhdroid.view.RotateListener;
 import com.jhdroid.view.Roulette;
 
 import java.lang.ref.Reference;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,15 +66,13 @@ public class randomFragment extends Fragment {
     static String[] randomList = new String[5];
     private Context context;
     FragmentContainerView rouletteFragment, ladderFragment;
-    static String[] restaurantName = new String[14];    //DB에서 가져올 식당 이름
-    String[] restaurantType = new String[14];    //DB에서 가져올 식당 분류
-    String[] restaurantMenu = new String[14];    //DB에서 가져올 식당 메뉴
+    ArrayList<String> restaurantName = new ArrayList<>();    //DB에서 가져올 식당 이름
+    ArrayList<String> restaurantType = new ArrayList<>();    //DB에서 가져올 식당 분류
+    ArrayList<String> restaurantMenu = new ArrayList<>();    //DB에서 가져올 식당 메뉴
     float[] restaurantLat;   //DB에서 가져올 식당 위도
     float[] restaurantLng;  //DB에서 가져올 식당 경도
-    int randomvalue = (int)((Math.random()) * 10 / 2);
     Random random = new Random();
     final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    Roulette roulette;
 
     public randomFragment() {
 
@@ -91,47 +95,51 @@ public class randomFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_random, container, false);
+    }
 
-        View view = inflater.inflate(R.layout.fragment_random, container, false);
-        context = container.getContext();
-        roulette = view.findViewById(R.id.roulette);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         luckyWheel = view.findViewById(R.id.randomWheel);
 
-
-        db.collection("식당").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()) {
-                    int restaurantNum = task.getResult().size();
-                    for (int i = 0; i < restaurantNum; i++) {
-                        restaurantName[i] = (String) task.getResult().getDocuments().get(i).get("식당이름");
-                        restaurantType[i] = (String) task.getResult().getDocuments().get(i).get("분류");
-                        restaurantMenu[i] = (String) task.getResult().getDocuments().get(i).get("대표메뉴");
-                    }
-//                    for(int i = 0; i < 5; i++) {
-//                        int rv = random.nextInt(14);
-//                        itemList.add(new WheelItem(Color.parseColor("#FFFFFF"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), restaurantName[rv]));
-//                    }
-                    Log.d(TAG, "실행됨");
-                }
-                else {
-                    Log.d(TAG, "Error getting Documents." + task.getException());
-                }
+        db.collection("식당").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                generateWheelItems(task.getResult().getDocuments());
+            } else {
+                Log.d(TAG, "Error getting Documents." + task.getException());
             }
         });
 
-        itemList.add(new WheelItem(Color.parseColor("#FFFFFF"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), "궁가"));
-        luckyWheel.addWheelItems(itemList);
-
+        ArrayList<WheelItem> dummyItems = new ArrayList<>();
+        dummyItems.add(new WheelItem(Color.parseColor("#FFFFFF"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), ""));
+        luckyWheel.addWheelItems(dummyItems);
 
         Button btnStartWheel = view.findViewById(R.id.btnStartWheel);
-        btnStartWheel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                luckyWheel.rotateWheelTo(randomvalue + 1);
-            }
+        btnStartWheel.setOnClickListener(v -> {
+            int randomIndex = new Random().nextInt(itemList.size() - 1);
+            luckyWheel.rotateWheelTo(randomIndex);
         });
-
-        return view;
     }
+
+    private void generateWheelItems(List<DocumentSnapshot> snapshots) {
+
+        int restaurantNum = snapshots.size();
+
+        for (int i = 0; i < restaurantNum; i++) {
+            DocumentSnapshot document = snapshots.get(i);
+            restaurantName.add((String) document.get("식당이름"));
+            restaurantType.add((String) document.get("분류"));
+            restaurantMenu.add((String) document.get("대표메뉴"));
+        }
+
+        for (int i = 0; i < 5; i++) {
+            int rv = new Random().nextInt(restaurantName.size() - 1);
+            String item = restaurantName.get(rv);
+            itemList.add(new WheelItem(Color.BLACK, BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), item));
+        }
+
+        luckyWheel.addWheelItems(itemList);
+    }
+
 }
