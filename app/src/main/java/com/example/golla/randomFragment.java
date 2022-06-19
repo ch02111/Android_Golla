@@ -103,6 +103,8 @@ public class randomFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         luckyWheel = view.findViewById(R.id.randomWheel);
 
+        itemList = new ArrayList<>();
+
         db.collection("식당").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 generateWheelItems(task.getResult().getDocuments());

@@ -117,7 +117,7 @@ import java.util.ArrayList;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    private ArrayList<RecyclerViewItem> list;
+    private ArrayList<RecyclerViewItem> list = new ArrayList<>();
     private Context context;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -131,31 +131,49 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             this.history_name = itemView.findViewById(R.id.history_restaurantNameTv);
             this.history_date = itemView.findViewById(R.id.history_restaurantDateTv);
         }
+
+        public void setData(RecyclerViewItem item) {
+            FirebaseStorage.getInstance()
+                    .getReference()
+                    .child(item.getRestaurantName() + ".jpg")
+                    .getDownloadUrl()
+                    .addOnSuccessListener(uri -> {
+                        Glide.with(itemView)
+                                .load(uri)
+                                .into(history_iv);
+                    });
+
+
+            history_name.setText(item.getRestaurantName());
+            history_date.setText(item.getRestaurantDate());
+        }
+
     }
 
-    public RecyclerViewAdapter(ArrayList<RecyclerViewItem> list, Context context) {
-        this.list = list;
+    public RecyclerViewAdapter(Context context) {
         this.context = context;
+    }
+
+    public void setData(ArrayList<RecyclerViewItem> list) {
+        this.list = list;
+        Log.d("RecyclerViewAdapter", "Data Updated : " + list);
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public RecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.history_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewAdapter.ViewHolder holder, int position) {
-        Uri uri = Uri.parse("gs://golla-d8534.appspot.com/" + list.get(position).getRestaurantName() + ".jpg");
-        Glide.with(holder.itemView).load(uri).into(holder.history_iv);
-        holder.history_name.setText(list.get(position).getRestaurantName());
-        holder.history_date.setText(list.get(position).getRestaurantDate());
+        holder.setData(list.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return (list != null ? list.size() : 0);
+        return list.size();
     }
 }
