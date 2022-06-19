@@ -35,6 +35,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.jhdroid.view.RotateListener;
+import com.jhdroid.view.Roulette;
 
 import java.lang.ref.Reference;
 import java.text.SimpleDateFormat;
@@ -53,7 +55,9 @@ import java.util.Random;
 public class randomFragment extends Fragment {
 
     LuckyWheel luckyWheel;
-    static List<WheelItem> wheelItems = new ArrayList<>();
+    ArrayList<String> restList = new ArrayList<>();
+    List<WheelItem> itemList = new ArrayList<>();
+    static String[] randomList = new String[5];
     private Context context;
     FragmentContainerView rouletteFragment, ladderFragment;
     static String[] restaurantName = new String[14];    //DB에서 가져올 식당 이름
@@ -64,6 +68,7 @@ public class randomFragment extends Fragment {
     int randomvalue = (int)((Math.random()) * 10 / 2);
     Random random = new Random();
     final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    Roulette roulette;
 
     public randomFragment() {
 
@@ -89,56 +94,34 @@ public class randomFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_random, container, false);
         context = container.getContext();
+        roulette = view.findViewById(R.id.roulette);
         luckyWheel = view.findViewById(R.id.randomWheel);
+
 
         db.collection("식당").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()) {
-                    QuerySnapshot document = task.getResult();
-                    int restaurantNum = document.size();
+                    int restaurantNum = task.getResult().size();
                     for (int i = 0; i < restaurantNum; i++) {
                         restaurantName[i] = (String) task.getResult().getDocuments().get(i).get("식당이름");
                         restaurantType[i] = (String) task.getResult().getDocuments().get(i).get("분류");
                         restaurantMenu[i] = (String) task.getResult().getDocuments().get(i).get("대표메뉴");
                     }
+//                    for(int i = 0; i < 5; i++) {
+//                        int rv = random.nextInt(14);
+//                        itemList.add(new WheelItem(Color.parseColor("#FFFFFF"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), restaurantName[rv]));
+//                    }
+                    Log.d(TAG, "실행됨");
                 }
                 else {
                     Log.d(TAG, "Error getting Documents." + task.getException());
                 }
             }
         });
-        if(restaurantName[0] == null || restaurantName[0].equals("")) {
-            Log.d(TAG, "빈 값임");
-        }
-        wheelItems.add(new WheelItem(Color.parseColor("#80bdff"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), "고씨네"));
-        wheelItems.add(new WheelItem(Color.parseColor("#91ff99"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), "궁가"));
-        wheelItems.add(new WheelItem(Color.parseColor("#80bdff"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), "긴자료코"));
-        wheelItems.add(new WheelItem(Color.parseColor("#91ff99"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), "담윤순대국"));
-        wheelItems.add(new WheelItem(Color.parseColor("#fa7f9e"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), "동궁찜닭"));
-        luckyWheel.addWheelItems(wheelItems);
 
-        luckyWheel.setLuckyWheelReachTheTarget(new OnLuckyWheelReachTheTarget() {
-            @Override
-            public void onReachTarget() {
-                String result = wheelItems.get(randomvalue).text;
-                Toast.makeText(context, "결과 : " + result, Toast.LENGTH_SHORT).show();
-                Map<String, Object> history = new HashMap<>();
-                history.put("식당이름", result);
-                history.put("방문날짜", new SimpleDateFormat("yyyy년 MM월 dd일").format(new Date()));
-                db.collection("기록").add(history).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Toast.makeText(context, "과거 기록에 기록되었습니다.", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "과거 기록 실패");
-                    }
-                });
-            }
-        });
+        itemList.add(new WheelItem(Color.parseColor("#FFFFFF"), BitmapFactory.decodeResource(getResources(), R.drawable.tempimg), "궁가"));
+        luckyWheel.addWheelItems(itemList);
 
 
         Button btnStartWheel = view.findViewById(R.id.btnStartWheel);

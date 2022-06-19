@@ -8,9 +8,7 @@ public class RecyclerViewItem {
         return restaurantName;
     }
 
-    public void setRestaurantName(String restaurantName) {
-        this.restaurantName = restaurantName;
-    }
+    public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
 
     public String getRestaurantDate() {
         return restaurantDate;
